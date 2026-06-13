@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+
+  <title>Zoo</title>
+
+  <!-- 手書き風フォント -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: #000;
+      font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif;
+      color: #fff;
+    }
+
+    body {
+      position: fixed;
+      inset: 0;
+      background: #000;
+    }
+
+    .page {
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+      height: 100dvh;
+      overflow: hidden;
+      background: #000;
+    }
+
+    /* =========================
+       動画：音声入り動画1本
+    ========================= */
+    .movie-wrap {
+      position: fixed;
+      inset: 0;
+      z-index: 1;
+      background: #000;
+      overflow: hidden;
+      opacity: 0;
+      transition: opacity 1.2s ease;
+    }
+
+    .movie {
+      position: absolute;
+      inset: 0;
+      width: 100vw;
+      height: 100vh;
+      height: 100dvh;
+      object-fit: cover;
+      object-position: center center;
+      background: #000;
+      display: block;
+    }
+
+    /* =========================
+       再生前背景：ジャケ写拡大＋ほどよくボカシ
+    ========================= */
+    .intro-bg-wrap {
+      position: absolute;
+      inset: 0;
+      z-index: 2;
+      overflow: hidden;
+      opacity: 1;
+      transition: opacity 1.1s ease;
+      background: #f2c300;
+    }
+
+    .intro-bg {
+      position: absolute;
+      inset: -24px;
+      background-image: url("Zoo.jpg");
+      background-size: cover;
+      background-position: center;
+      filter: blur(14px);
+      transform: scale(1.1);
+      opacity: 1;
+    }
+
+    .intro-yellow {
+      position: absolute;
+      inset: 0;
+      background:
+        linear-gradient(
+          rgba(242, 195, 0, 0.52),
+          rgba(242, 195, 0, 0.52)
+        );
+    }
+
+    .intro-dark {
+      position: absolute;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.08);
+    }
+
+    /* =========================
+       上の手書きロゴ
+    ========================= */
+    .event-logo {
+      position: absolute;
+      top: calc(env(safe-area-inset-top) + 18px);
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 6;
+      width: 100%;
+      padding: 0 20px;
+      text-align: center;
+      font-family: "Caveat", cursive;
+      color: rgba(255, 255, 255, 0.96);
+      pointer-events: none;
+      text-shadow: 0 4px 18px rgba(0, 0, 0, 0.34);
+      transition: opacity 1s ease, transform 1s ease;
+    }
+
+    .event-date {
+      font-size: clamp(18px, 4.8vw, 30px);
+      font-weight: 700;
+      line-height: 0.9;
+    }
+
+    .event-names {
+      font-size: clamp(26px, 6.8vw, 42px);
+      font-weight: 700;
+      line-height: 0.95;
+    }
+
+    .event-subtitle {
+      font-size: clamp(15px, 4vw, 24px);
+      font-weight: 600;
+      line-height: 0.95;
+      opacity: 0.92;
+    }
+
+    /* =========================
+       再生前カード
+    ========================= */
+    .start-ui {
+      position: absolute;
+      inset: 0;
+      z-index: 3;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      transition: opacity 1s ease, transform 1s ease;
+    }
+
+    .listen-card {
+      width: min(78vw, 330px);
+      padding: 20px;
+      margin-top: 120px;
+      border-radius: 28px;
+      text-align: center;
+      background: rgba(255, 255, 255, 0.15);
+      border: 1px solid rgba(255, 255, 255, 0.32);
+      box-shadow: 0 18px 50px rgba(0, 0, 0, 0.30);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+    }
+
+    .label {
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: 0.18em;
+      opacity: 0.84;
+      margin-bottom: 10px;
+    }
+
+    .song-title {
+      font-size: clamp(34px, 9vw, 52px);
+      font-weight: 900;
+      letter-spacing: 0.08em;
+      line-height: 1.05;
+      margin-bottom: 16px;
+      text-shadow: 0 4px 18px rgba(0, 0, 0, 0.28);
+    }
+
+    .jacket {
+      width: 100%;
+      aspect-ratio: 1 / 1;
+      object-fit: cover;
+      display: block;
+      border-radius: 22px;
+      margin-bottom: 20px;
+      box-shadow: 0 12px 34px rgba(0, 0, 0, 0.32);
+      background: rgba(255, 255, 255, 0.18);
+    }
+
+    .play-button {
+      width: 132px;
+      height: 52px;
+      border: none;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.94);
+      color: #c59a00;
+      font-size: 15px;
+      font-weight: 900;
+      letter-spacing: 0.16em;
+      cursor: pointer;
+      box-shadow: 0 10px 28px rgba(0, 0, 0, 0.24);
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .play-button:active {
+      transform: scale(0.96);
+    }
+
+    .play-button:disabled {
+      opacity: 0.7;
+    }
+
+    /* =========================
+       最後の投票画面
+    ========================= */
+    .vote-ui {
+      position: absolute;
+      inset: 0;
+      z-index: 4;
+      background: #f2c300;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: calc(env(safe-area-inset-top) + 28px) 28px calc(env(safe-area-inset-bottom) + 28px);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 1.2s ease;
+    }
+
+    .vote-box {
+      max-width: 760px;
+      padding-top: 90px;
+    }
+
+    .vote-title {
+      font-size: clamp(38px, 11vw, 78px);
+      font-weight: 900;
+      letter-spacing: 0.1em;
+      line-height: 1;
+      margin-bottom: 28px;
+      text-shadow: 0 5px 20px rgba(0, 0, 0, 0.32);
+    }
+
+    .vote-ja {
+      font-size: clamp(18px, 4.8vw, 30px);
+      font-weight: 800;
+      line-height: 1.55;
+      margin-bottom: 18px;
+      text-shadow: 0 4px 16px rgba(0, 0, 0, 0.26);
+    }
+
+    .vote-en {
+      font-size: clamp(15px, 3.8vw, 24px);
+      font-weight: 700;
+      line-height: 1.45;
+      opacity: 0.94;
+      text-shadow: 0 4px 16px rgba(0, 0, 0, 0.26);
+    }
+
+    /* =========================
+       PLAY後
+    ========================= */
+    .page.is-playing .movie-wrap {
+      opacity: 1;
+    }
+
+    .page.is-playing .intro-bg-wrap {
+      opacity: 0;
+    }
+
+    .page.is-playing .start-ui {
+      opacity: 0;
+      transform: scale(0.96);
+      pointer-events: none;
+    }
+
+    .page.is-playing .start-logo {
+      opacity: 0;
+      transform: translateX(-50%) translateY(-8px);
+    }
+
+    /* =========================
+       動画終了後
+    ========================= */
+    .page.is-finished .movie-wrap {
+      opacity: 0;
+    }
+
+    .page.is-finished .vote-ui {
+      opacity: 1;
+    }
+
+    /* =========================
+       低い画面対策
+    ========================= */
+    @media (max-height: 760px) {
+      .listen-card {
+        width: min(74vw, 310px);
+        padding: 18px;
+        margin-top: 112px;
+        border-radius: 24px;
+      }
+
+      .song-title {
+        font-size: clamp(30px, 8vw, 44px);
+        margin-bottom: 14px;
+      }
+
+      .jacket {
+        border-radius: 18px;
+        margin-bottom: 18px;
+      }
+
+      .play-button {
+        width: 122px;
+        height: 48px;
+        font-size: 14px;
+      }
+    }
+
+    @media (max-height: 660px) {
+      .event-date {
+        font-size: clamp(16px, 4vw, 24px);
+      }
+
+      .event-names {
+        font-size: clamp(22px, 5.8vw, 34px);
+      }
+
+      .event-subtitle {
+        font-size: clamp(13px, 3.4vw, 20px);
+      }
+
+      .listen-card {
+        width: min(70vw, 285px);
+        padding: 16px;
+        margin-top: 100px;
+      }
+
+      .label {
+        font-size: 10px;
+        margin-bottom: 8px;
+      }
+
+      .song-title {
+        font-size: clamp(28px, 7vw, 38px);
+        margin-bottom: 12px;
+      }
+
+      .jacket {
+        margin-bottom: 14px;
+      }
+
+      .play-button {
+        width: 112px;
+        height: 44px;
+        font-size: 13px;
+      }
+
+      .vote-box {
+        padding-top: 100px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <main class="page" id="page">
+
+    <!-- 音声入り動画 -->
+    <div class="movie-wrap">
+      <video
+        class="movie"
+        id="movie"
+        src="ZOO.m4v"
+        playsinline
+        webkit-playsinline
+        preload="auto"
+      ></video>
+    </div>
+
+    <!-- 再生前：ジャケ写拡大ボカシ背景 -->
+    <div class="intro-bg-wrap">
+      <div class="intro-bg"></div>
+      <div class="intro-yellow"></div>
+      <div class="intro-dark"></div>
+    </div>
+
+    <!-- 最初の上部ロゴ -->
+    <div class="event-logo start-logo">
+      <div class="event-date">2026.7.19 sun</div>
+      <div class="event-names">Yuki &amp; Saeko</div>
+      <div class="event-subtitle">Song guessing game</div>
+    </div>
+
+    <!-- 最初の視聴サイト風カード -->
+    <div class="start-ui">
+      <div class="listen-card">
+        <div class="label">NOW LISTENING</div>
+        <h1 class="song-title">Zoo</h1>
+        <img class="jacket" src="Zoo.jpg" alt="Zoo">
+        <button class="play-button" id="playButton">PLAY</button>
+      </div>
+    </div>
+
+    <!-- 最後の投票画面 -->
+    <div class="vote-ui">
+      <div class="event-logo vote-logo">
+        <div class="event-date">2026.7.19 sun</div>
+        <div class="event-names">Yuki &amp; Saeko</div>
+        <div class="event-subtitle">Song guessing game</div>
+      </div>
+
+      <div class="vote-box">
+        <div class="vote-title">VOTE YELLOW</div>
+
+        <div class="vote-ja">
+          この曲だと思ったら、黄色に投票して<br>
+          サイリウムをお取りください
+        </div>
+
+        <div class="vote-en">
+          Think this is the song?<br>
+          Vote for yellow and grab a yellow glow stick!
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <script>
+    const page = document.getElementById("page");
+    const movie = document.getElementById("movie");
+    const playButton = document.getElementById("playButton");
+
+    playButton.addEventListener("click", async () => {
+      playButton.disabled = true;
+
+      page.classList.remove("is-finished");
+
+      movie.pause();
+      movie.currentTime = 0;
+
+      page.classList.add("is-playing");
+
+      try {
+        movie.muted = false;
+        movie.volume = 1;
+        await movie.play();
+      } catch (error) {
+        console.log("動画再生エラー:", error);
+
+        playButton.disabled = false;
+        page.classList.remove("is-playing");
+
+        movie.pause();
+
+        alert("動画を再生できませんでした。もう一度PLAYを押してください。");
+        return;
+      }
+    });
+
+    movie.addEventListener("ended", () => {
+      movie.pause();
+
+      page.classList.remove("is-playing");
+      page.classList.add("is-finished");
+    });
+  </script>
+</body>
+</html>
